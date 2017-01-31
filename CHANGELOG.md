@@ -4,6 +4,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows conventions [outlined here](http://keepachangelog.com/).
 
+## v0.15.1 - 31-Jan-2017
+### Added
+- `(<TAB> saves)` string to OutcomeCard components when editing
+- `npm run test:xunit` command for CircleCI 2.0
+
+## v0.15.0 - 30-Jan-2017
+### Added
+- When version is upgraded, we now emit a toast asking the user to upgrade
+  their client version
+- Markdown support added to Action and Project cards
+
 ## v0.14.2 - 29-Jan-2017
 ### Fixes
 - #646 the first-time message meeting completion message was not displaying
