@@ -4,6 +4,96 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows conventions [outlined here](http://keepachangelog.com/).
 
+## v0.16.5 - 11-Mar-2017
+### Added
+- Awesome spinner component
+- Billing unit tests
+- A few modifications and final touches to invoices
+
+### Fixed
+- #755 filter handle alignment regression
+- #759 regression: clients unable to accept invitations
+- #793 no such customer exception
+
+## v0.16.3 - 8-Mar-2017
+### Added
+- Unit tests for Action mutations
+
+### Fixed
+- #780 email regex allowed multiple emails
+- #782 regression on Project index used by archived projects
+- #783 ensured CC always exists on org, no longer using pagination for invoiceList
+- #784 invoice icon styling bug in production
+
+## v0.16.3 - 5-Mar-2017
+### Added
+- #462 source maps added to minified production builds
+- Individual team and user project drag-and-drop sort orders now combined
+  into one, universal sorting order used across the system
+- Dashboard notification bar is now implemented as a "DashAlert" modal
+- #736 permutations on invoice
+
+### Fixed
+- #553 fine tune DnD
+- #714 can't delete team members
+- #724 top notification bar & dash modal overlap
+- #733 team project columns (filtered by team member) cache/redux error on DnD
+
+## v0.16.2 - 4-Mar-2017
+### Added
+- Rejoin facilitator button
+- Switched to [migrate-rethinkdb](https://github.com/ParabolInc/migrate-rethinkdb)
+
+## v0.16.1 - 2-Mar-2017
+### Added
+- New unit tests
+
+### Fixed
+- Fix upcoming vs pending on invoices
+- #751 production deploy, assets.json not found
+- #753 cannot read property 'bestCursor' of undefined
+- #755 filter handle alignment regression
+- #757 add new team, always shows orgs as "Loading..."
+
+## v0.16.0 - 25-Feb-2017
+### Added
+- Organizations: teams can be tied together into organizations
+- User trials & billing: hey look! A business model!
+   - New & grandfathered users start a 30 day trial
+   - Trial & access expiry
+   - Payment information & stripe integration
+   - Invoicing
+- Notifications: a new channel to communicate with our users
+- Portals: we're using [react-portal-hoc](https://github.com/mattkrick/react-portal-hoc)
+  to implement our dropdown menus and modals
+- Updated to Node.js 7.6.0, native async/await
+- Switched to [jest](https://facebook.github.io/jest/) for unit testing
+   - Added first suite of server unit tests
+- Refactored drag-and-drop support
+- Refactored `KICK_OUT` message onto `USER_MEMO` websocket channel
+- Much improved development build time by dll-izing vendor package
+   - See: `npm run build:dll`
+- Added `npm run start:tunnel` to start [ultrahook](http://www.ultrahook.com/)
+  to facilitate Stripe & future webhook development
+- Server data validation pattern
+- Badge component
+- Presence added to dashboards (#523)
+
+### Fixed
+- #253 auth0 token tms out of sync with rethinkdb
+- #277 graphql browser CSS trouble
+- #437 TypeError: Cannot read property 'openArea' of undefined
+- #517 server exception encountered when generating meeting summary
+- #530 duplicate team selection after reordering
+- #558 when renaming on team settings, validation styling bug
+- #573 Amazon S3 returning 403 for VPN clients
+- #578 meeting Stuck at First Call
+- #583 allow production build without S3
+- #598 fix GraphQL v0.8.0 breaking changes
+- #608 square avatars are square (with rounded styling)
+- #718 toast notification for leaving a team copy
+- #725 acceptInvitation race condition
+
 ## v0.15.3 - 11-Feb-2017
 ### Added
 - OutcomeCard components (Projects, Action) now re-render their last-updated

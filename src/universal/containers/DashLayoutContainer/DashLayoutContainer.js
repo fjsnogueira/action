@@ -3,6 +3,8 @@ import {connect} from 'react-redux';
 import {cashay} from 'cashay';
 import DashLayout from 'universal/components/Dashboard/DashLayout';
 import {TEAM} from 'universal/subscriptions/constants';
+import {TRIAL_EXPIRES_SOON, TRIAL_EXPIRED} from 'universal/utils/constants';
+import {setDashAlertPresence} from 'universal/modules/dashboard/ducks/dashDuck';
 
 const resolveActiveMeetings = (teams) => {
   if (teams !== resolveActiveMeetings.teams) {
@@ -28,16 +30,21 @@ query {
     name
     meetingId
   }
+  trialNotification @cached(type: "Notification") {
+    orgId
+    type
+  }
 }
 `;
 
 
 const mapStateToProps = (state) => {
-  const {teams} = cashay.query(dashNavListQuery, {
+  const {trialNotification, teams} = cashay.query(dashNavListQuery, {
     // currently same as dashNavListContainer, could combine ops
     op: 'dashLayoutContainer',
     resolveCached: {
-      teams: () => () => true
+      teams: () => () => true,
+      trialNotification: () => (doc) => (doc.type === TRIAL_EXPIRED || doc.type === TRIAL_EXPIRES_SOON) && doc.startAt < new Date()
     },
     sort: {
       teams: (a, b) => a.name > b.name ? 1 : -1
@@ -45,7 +52,10 @@ const mapStateToProps = (state) => {
   }).data;
   return {
     activeMeetings: resolveActiveMeetings(teams),
-    tms: state.auth.obj.tms
+    tms: state.auth.obj.tms,
+    userId: state.auth.sub,
+    trialNotification,
+    hasDashAlert: state.dash.hasDashAlert
   };
 };
 
@@ -61,24 +71,49 @@ export default class DashLayoutContainer extends Component {
   static propTypes = {
     activeMeetings: PropTypes.array,
     children: PropTypes.any,
-    title: PropTypes.string,
-    tms: PropTypes.array.isRequired
+    tms: PropTypes.array,
+    trialNotification: PropTypes.object
+    // userId: PropTypes.string
   };
 
+  componentWillMount() {
+    this.maybeSetDashAlert(this.props);
+  }
+
   componentDidMount() {
-    subToAllTeams(this.props.tms);
+    const {tms} = this.props;
+    subToAllTeams(tms);
+    // cashay.subscribe(NOTIFICATIONS, userId)
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.tms !== nextProps.tms) {
       subToAllTeams(nextProps.tms);
     }
+    this.maybeSetDashAlert(nextProps);
+  }
+
+  maybeSetDashAlert(props) {
+    const {
+      activeMeetings,
+      trialNotification,
+      hasDashAlert,
+      dispatch
+    } = props;
+    const shouldHaveDashAlert = activeMeetings.length > 0 || trialNotification.type;
+    if (shouldHaveDashAlert !== hasDashAlert) {
+      dispatch(setDashAlertPresence(shouldHaveDashAlert));
+    }
   }
 
   render() {
-    const {activeMeetings, children, title} = this.props;
+    const {activeMeetings, children, trialNotification} = this.props;
     return (
-      <DashLayout activeMeetings={activeMeetings} children={children} title={title}/>
+      <DashLayout
+        activeMeetings={activeMeetings}
+        children={children}
+        trialNotification={trialNotification}
+      />
     );
   }
 }

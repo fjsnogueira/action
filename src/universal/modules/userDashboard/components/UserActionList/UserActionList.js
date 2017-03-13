@@ -15,8 +15,10 @@ import {DropTarget as dropTarget} from 'react-dnd';
 import {ACTION} from 'universal/utils/constants';
 import handleActionHover from 'universal/dnd/handleActionHover';
 import withDragState from 'universal/dnd/withDragState';
+import handleDrop from 'universal/dnd/handleDrop';
 
 const columnTarget = {
+  drop: handleDrop,
   hover: handleActionHover
 };
 
@@ -33,7 +35,7 @@ const UserActionList = (props) => {
           newAction: {
             id: `${teamId}::${shortid.generate()}`,
             teamMemberId: `${userId}::${teamId}`,
-            sortOrder: getNextSortOrder(actions, 'sortOrder')
+            sortOrder: getNextSortOrder(actions)
           }
         }
       };
@@ -56,7 +58,6 @@ const UserActionList = (props) => {
               actions={actions}
               dispatch={dispatch}
               teams={teams}
-              actionCount={actionCount}
               userId={userId}
             /> :
             <UserActionListHeader onAddNewAction={createNewAction}/>

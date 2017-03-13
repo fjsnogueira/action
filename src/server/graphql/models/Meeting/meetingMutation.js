@@ -1,5 +1,5 @@
 import getRethink from 'server/database/rethinkDriver';
-import {requireSUOrTeamMember} from '../authorization';
+import {requireSUOrTeamMember} from 'server/utils/authorization';
 import {Meeting} from './meetingSchema';
 import sendEmailSummary from './helpers/sendEmailSummary';
 
@@ -22,21 +22,7 @@ export default {
       const r = getRethink();
 
       // AUTH
-      const meeting = await r.table('Meeting').get(meetingId).default({})
-        .do((res) => {
-          return res.merge({
-            invitees: res('invitees').default([])
-              .map((invitee) => {
-                const teamMember = r.table('TeamMember').get(invitee('id'));
-                return invitee.merge({
-                  picture: teamMember('picture'),
-                  preferredName: teamMember('preferredName'),
-                  actions: res('actions').filter({teamMemberId: invitee('id')}),
-                  projects: res('projects').filter({teamMemberId: invitee('id')})
-                });
-              })
-          });
-        });
+      const meeting = await r.table('Meeting').get(meetingId);
       const {teamId} = meeting;
       // perform the query before the check because 99.9% of attempts will be honest & that will save us a query
       requireSUOrTeamMember(authToken, teamId);

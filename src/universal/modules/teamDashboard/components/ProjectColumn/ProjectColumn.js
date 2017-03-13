@@ -15,10 +15,13 @@ import getNextSortOrder from 'universal/utils/getNextSortOrder';
 import {Menu, MenuItem} from 'universal/modules/menu';
 import {DropTarget as dropTarget} from 'react-dnd';
 import handleColumnHover from 'universal/dnd/handleColumnHover';
+import handleDrop from 'universal/dnd/handleDrop';
 import withDragState from 'universal/dnd/withDragState';
 import AddProjectButton from 'universal/components/AddProjectButton/AddProjectButton';
+import dndNoise from 'universal/utils/dndNoise';
 
 const columnTarget = {
+  drop: handleDrop,
   hover: handleColumnHover
 };
 
@@ -27,14 +30,24 @@ const badgeIconStyle = {
   lineHeight: '1.5rem',
   width: '1.5rem'
 };
-const handleAddProjectFactory = (status, teamMemberId, teamSort, userSort) => () => {
+
+const originAnchor = {
+  vertical: 'bottom',
+  horizontal: 'right'
+};
+
+const targetAnchor = {
+  vertical: 'top',
+  horizontal: 'right'
+};
+
+const handleAddProjectFactory = (status, teamMemberId, sortOrder) => () => {
   const [, teamId] = teamMemberId.split('::');
   const newProject = {
     id: `${teamId}::${shortid.generate()}`,
     status,
     teamMemberId,
-    teamSort,
-    userSort
+    sortOrder
   };
   cashay.mutate('createProject', {variables: {newProject}});
 };
@@ -43,55 +56,54 @@ const ProjectColumn = (props) => {
   const {area, connectDropTarget, dragState, status, projects, myTeamMemberId, styles, teams, userId} = props;
 
   const label = themeLabels.projectStatus[status].slug;
-  const makeTeamMenuItems = (userSort) => {
+  const makeTeamMenuItems = (sortOrder) => {
     return teams.map(team => ({
       label: team.name,
-      isActive: false,
       handleClick: () => cashay.mutate('createProject', {
         variables: {
           newProject: {
             id: `${team.id}::${shortid.generate()}`,
             status,
             teamMemberId: `${userId}::${team.id}`,
-            teamSort: 0,
-            userSort
+            sortOrder
           }
         }
       })
     }));
   };
   const makeAddProject = () => {
+    const sortOrder = getNextSortOrder(projects, dndNoise());
     if (area === TEAM_DASH) {
-      const teamSort = getNextSortOrder(projects, 'teamSort');
-      const handleAddProject = handleAddProjectFactory(status, myTeamMemberId, teamSort, 0);
-      return <AddProjectButton toggleClickHandler={handleAddProject} toggleLabel={label}/>;
+      const handleAddProject = handleAddProjectFactory(status, myTeamMemberId, sortOrder);
+      return <AddProjectButton onClick={handleAddProject} label={label}/>;
     } else if (area === USER_DASH) {
-      const userSort = getNextSortOrder(projects, 'userSort');
       if (teams.length === 1) {
         const {id: teamId} = teams[0];
         const generatedMyTeamMemberId = `${userId}::${teamId}`;
-        const handleAddProject = handleAddProjectFactory(status, generatedMyTeamMemberId, 0, userSort);
-        return <AddProjectButton toggleClickHandler={handleAddProject} toggleLabel={label}/>;
+        const handleAddProject = handleAddProjectFactory(status, generatedMyTeamMemberId, sortOrder);
+        return <AddProjectButton onClick={handleAddProject} label={label}/>;
       }
-      const menuItems = makeTeamMenuItems(userSort);
+      const itemFactory = () => {
+        const menuItems = makeTeamMenuItems(sortOrder);
+        return menuItems.map((item, idx) =>
+          <MenuItem
+            key={`MenuItem${idx}`}
+            label={item.label}
+            onClick={item.handleClick}
+          />
+        );
+      };
+
+      const toggle = <AddProjectButton label={label}/>;
       return (
         <Menu
-          menuKey={`UserDashAdd${status}Project`}
-          menuOrientation="right"
+          itemFactory={itemFactory}
+          originAnchor={originAnchor}
           menuWidth="10rem"
-          toggle={AddProjectButton}
-          toggleLabel={label}
-          toggleHeight="1.5rem" label="Select Team:"
-        >
-          {menuItems.map((item, idx) =>
-            <MenuItem
-              isActive={item.isActive}
-              key={`MenuItem${idx}`}
-              label={item.label}
-              onClick={item.handleClick}
-            />
-          )}
-        </Menu>
+          targetAnchor={targetAnchor}
+          toggle={toggle}
+          label="Select Team:"
+        />
       );
     }
     return null;
@@ -230,8 +242,8 @@ const dropTargetCb = (connectTarget) => ({
 });
 
 export default
-  withDragState(
-dropTarget(PROJECT, columnTarget, dropTargetCb)(
+withDragState(
+  dropTarget(PROJECT, columnTarget, dropTargetCb)(
     withStyles(styleThunk)(ProjectColumn)
   )
 );

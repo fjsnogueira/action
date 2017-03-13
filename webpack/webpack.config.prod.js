@@ -1,10 +1,12 @@
 import path from 'path';
 import webpack from 'webpack';
-import AssetsPlugin from 'manifest-assets-webpack-plugin';
+import AssetsPlugin from 'assets-webpack-plugin';
 import WebpackShellPlugin from 'webpack-shell-plugin';
 import S3Plugin from 'webpack-s3-plugin';
 import {getDotenv} from '../src/universal/utils/dotenv';
 import {getS3BasePath} from './utils/getS3BasePath';
+import getWebpackPublicPath from '../src/server/utils/getWebpackPublicPath';
+import npmPackage from '../package.json';
 
 // Import .env and expand variables:
 getDotenv();
@@ -31,7 +33,16 @@ const prefetchPlugins = prefetches.map(specifier => new webpack.PrefetchPlugin(s
 
 const deployPlugins = [];
 if (process.env.WEBPACK_MIN) {
-  deployPlugins.push(new webpack.optimize.UglifyJsPlugin({compressor: {warnings: false}, comments: /(?:)/}));
+  deployPlugins.push(new webpack.optimize.UglifyJsPlugin({
+    compressor: {warnings: false},
+    comments: /(?:)/,
+    sourceMap: true
+  }));
+  const sourceMappingBase = getWebpackPublicPath();
+  deployPlugins.push(new webpack.SourceMapDevToolPlugin({
+    filename: '[name]_[chunkhash].js.map',
+    append: `\n//# sourceMappingURL=${sourceMappingBase}[url]`
+  }));
   deployPlugins.push(new webpack.LoaderOptionsPlugin({comments: false}));
 }
 if (process.env.WEBPACK_DEPLOY) {
@@ -45,7 +56,8 @@ if (process.env.WEBPACK_DEPLOY) {
     s3UploadOptions: {
       Bucket: process.env.AWS_S3_BUCKET
     },
-    basePath: getS3BasePath()
+    basePath: getS3BasePath(),
+    directory: path.join(root, 'build')
   }));
 }
 
@@ -82,11 +94,12 @@ export default {
       filename: 'assets.json',
       includeManifest: true
     }),
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
       __CLIENT__: true,
       __PRODUCTION__: true,
       __WEBPACK__: true,
+      __APP_VERSION__: JSON.stringify(npmPackage.version),
       'process.env.NODE_ENV': JSON.stringify('production')
     }),
     new WebpackShellPlugin({
@@ -102,7 +115,7 @@ export default {
       {test: /\.(eot|ttf|wav|mp3)(\?\S*)?$/, loader: 'file-loader'},
       {
         test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         include: clientInclude
       },
       {

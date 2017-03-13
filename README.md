@@ -2,6 +2,7 @@
 
 [![Slack Status](http://slackin.parabol.co/badge.svg)](http://slackin.parabol.co/)
 [![CircleCI](https://circleci.com/gh/ParabolInc/action.svg?style=svg)](https://circleci.com/gh/ParabolInc/action)
+[![codecov](https://codecov.io/gh/ParabolInc/action/branch/master/graph/badge.svg)](https://codecov.io/gh/ParabolInc/action)
 
 ## New Beta!
 
@@ -36,7 +37,7 @@ Action is a Node.js application based upon the
 
 | Concern            | Solution                                                  |
 |--------------------|-----------------------------------------------------------|
-| Server             | [Node 6](https://nodejs.org/)                             |
+| Server             | [Node 7](https://nodejs.org/)                             |
 | Server Framework   | [Express](http://expressjs.com/)                          |
 | Database           | [RethinkDB](https://www.rethinkdb.com/)                   |
 | Data Transport     | [GraphQL](https://github.com/graphql/graphql-js)          |
@@ -44,7 +45,8 @@ Action is a Node.js application based upon the
 | Client State       | [Redux](http://redux.js.org/)                             |
 | Client Data Cache  | [Cashay](https://github.com/mattkrick/cashay)             |
 | Front-end Views    | [React](https://facebook.github.io/react/)                |
-| Styling            | [aphrodite](https://github.com/khan/aphrodite) |
+| Styling            | [aphrodite](https://github.com/khan/aphrodite)            |
+| Unit Testing       | [jest](https://facebook.github.io/jest)                   |
 
 Action is programmed in ECMAscript ES6/7 (including async/await).
 Transpilation is provided by [babel](https://github.com/babel/babel).
@@ -55,7 +57,7 @@ Transpilation is provided by [babel](https://github.com/babel/babel).
 
 #### Prerequisites
 
-Action requires Node.js >=5.10.1 (we're using 6.2.0 in development).
+Action requires Node.js >=7.6.0 (we're using 7.6.0 in development).
 We recommend using [n](https://github.com/tj/n) to install and manage your
 node versions.
 
@@ -63,13 +65,15 @@ Action also depends on [RethinkDB](https://rethinkdb.com/). Make sure
 you have it installed. If you have OSX, we recommend homebrew so
 upgrades are as easy as `brew update && brew upgrade rethinkdb`
 
+Action also uses [yarn](https://yarnpkg.com/) which can be installed by running `npm install -g yarn`
+
 #### Source code
 
 ```bash
 $ git clone https://github.com/ParabolInc/action.git
 $ cd action
 $ rethinkdb # in a separate window
-$ npm install
+$ yarn
 $ npm run quickstart
 ```
 _Remember: if RethinkDB is running locally, you can reach its dashboard at
@@ -90,6 +94,7 @@ In this mode, webpack will hot swap your updated client modules without
 needing to restarting the development server.
 
 ```bash
+$ npm run build
 $ npm run dev
 ```
 [http://localhost:3000/](http://localhost:3000/)
@@ -152,27 +157,7 @@ get involved and how to get compensated.
 
 ## Releases
 
-This table only includes major and minor releases. For patches
-and more details on all releases, refer to [CHANGELOG.md](./CHANGELOG.md).
-
-| Release | Summary                                    |
-|---------|--------------------------------------------|
-| v0.15.0 | Prompt to upgrade on new version, Markdown |
-| v0.14.0 | Secure user avatar upload to S3 bucket     |
-| v0.13.0 | Drag-and-drop added everywhere, bug fixes  |
-| v0.12.0 | Added team settings, modal components      |
-| v0.11.0 | Added S3 deployment, minor UI improvements |
-| v0.10.0 | Can add new teams, many fixes              |
-| v0.9.3  | Emails meeting summary, add Segment events |
-| v0.8.0  | Added end of meeting summary               |
-| v0.7.0  | Switch to aphrodite, me dashboard updates  |
-| v0.6.1  | Agenda items, @live directive, bug fixes   |
-| v0.5.3  | Add Project Updates, rallies, segment.io   |
-| v0.4.0  | Add Lobby, Check-in, start of Team Dash.   |
-| v0.3.0  | Add Welcome journey, redux-storage         |
-| v0.2.0  | Add first pass at team creation/invitation |
-| v0.1.0  | Things got a whole lot meatier             |
-| v0.0.1  | Developer preview and architecture demo    |
+For details on all releases, refer to [CHANGELOG.md](./CHANGELOG.md).
 
 ## About
 

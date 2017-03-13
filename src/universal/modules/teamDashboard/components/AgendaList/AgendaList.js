@@ -8,8 +8,10 @@ import {AGENDA_ITEM, AGENDA_ITEMS} from 'universal/utils/constants';
 import handleAgendaHover from 'universal/dnd/handleAgendaHover';
 import {DropTarget as dropTarget} from 'react-dnd';
 import withDragState from 'universal/dnd/withDragState';
+import handleDrop from 'universal/dnd/handleDrop';
 
 const columnTarget = {
+  drop: handleDrop,
   hover: handleAgendaHover
 };
 
@@ -19,7 +21,17 @@ const removeItemFactory = (itemId) => () => {
 };
 
 const AgendaList = (props) => {
-  const {agenda, agendaPhaseItem, connectDropTarget, dragState, gotoItem, styles} = props;
+  const {
+    agenda,
+    agendaPhaseItem,
+    connectDropTarget,
+    context,
+    disabled,
+    dragState,
+    gotoItem,
+    styles
+  } = props;
+  const canNavigate = context === 'meeting' && !disabled;
   dragState.clear();
   return connectDropTarget(
     <div className={css(styles.root)}>
@@ -29,6 +41,8 @@ const AgendaList = (props) => {
             key={`agendaItem${idx}`}
             agendaItem={item}
             agendaPhaseItem={agendaPhaseItem}
+            canNavigate={canNavigate}
+            disabled={disabled}
             gotoAgendaItem={() => gotoItem(idx + 1, AGENDA_ITEMS)}
             handleRemove={removeItemFactory(item.id)}
             idx={idx}
@@ -51,7 +65,9 @@ AgendaList.propTypes = {
   })),
   agendaPhaseItem: PropTypes.number,
   connectDropTarget: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
   gotoItem: PropTypes.func.isRequired,
+  router: PropTypes.object,
   styles: PropTypes.object,
   teamId: PropTypes.string.isRequired
 };
